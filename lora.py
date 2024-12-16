@@ -10,7 +10,7 @@ load_dotenv()
 access_token = os.getenv('HF_TOKEN')
 
 # Load model and tokenizer
-model_name = "meta-llama/Llama-3.2-1B"
+model_name = "meta-llama/Llama-3.2-1B-Instruct"
 model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token)
 tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token, padding_side="right")
 tokenizer.pad_token = tokenizer.eos_token
