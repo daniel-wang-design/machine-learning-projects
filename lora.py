@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, QuantoConfig
 import torch
 import os
 from dotenv import load_dotenv
@@ -9,9 +9,12 @@ from datasets import load_dataset
 load_dotenv()
 access_token = os.getenv('HF_TOKEN')
 
+# Quantization
+quantization_config = QuantoConfig(weights="float8")
+
 # Load model and tokenizer
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
-model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token)
+model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token, quantization_config=quantization_config)
 tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token, padding_side="right")
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -47,8 +50,7 @@ training_args = TrainingArguments(
     output_dir="./results",
     per_device_train_batch_size=4,
     num_train_epochs=3,
-    learning_rate=5e-5,
-    use_cpu=True
+    learning_rate=5e-5
 )
 trainer = Trainer(
     model=model,

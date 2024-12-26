@@ -5,4 +5,4 @@ loralib
 transformers
 peft
 python-dotenv
-scikit-learn
+optimum-quanto
