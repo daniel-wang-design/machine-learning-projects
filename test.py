@@ -1,4 +1,5 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, QuantoConfig, DataCollatorForLanguageModeling
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, DataCollatorForLanguageModeling
+from optimum.quanto import QuantizedModelForCausalLM, qint4
 import os
 from dotenv import load_dotenv
 from peft import LoraConfig, get_peft_model
@@ -8,14 +9,15 @@ from datasets import load_dataset
 load_dotenv()
 access_token = os.getenv('HF_TOKEN')
 
-# Quantization
-quantization_config = QuantoConfig(weights="int8")
-
 # Load model and tokenizer
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
-model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token, quantization_config=quantization_config)
+model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token)
+model = QuantizedModelForCausalLM.quantize(model, weights=qint4)
 tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token, padding_side="right")
 tokenizer.pad_token = "<|finetune_right_pad_id|>"
+
+
+# model.gradient_checkpointng_enable() # reduce vram by not storing intermediate values
 
 # Apply LoRA
 lora_config = LoraConfig(task_type="CAUSAL_LM", 
@@ -38,19 +40,18 @@ def format_dataset(data_point):
     tokens = tokenizer(prompt,
         truncation=True,
         max_length=256,
-        padding="max_length",
-        add_special_tokens=False)
-    tokens["labels"] = tokens['input_ids'].copy()
+        padding="max_length")
     return tokens
 
 # Load dataset
 dataset = load_dataset("fka/awesome-chatgpt-prompts", split='train')
 dataset = dataset.map(format_dataset)
-dataset = dataset.remove_columns(['act', "prompt"])
-print(dataset)
+dataset = dataset.remove_columns(["act", "prompt"])
 
 # Split into train and test set
 dataset = dataset.train_test_split(test_size=0.1)
+
+# batcher
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 # Trainer setup
@@ -62,6 +63,7 @@ training_args = TrainingArguments(
     do_eval=True,
     eval_strategy="epoch",
     save_strategy="epoch",
+    optim="adamw_8bit",
     warmup_steps=2,
     remove_unused_columns=False
 )
