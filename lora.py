@@ -47,7 +47,6 @@ def format_dataset(data_point):
 dataset = load_dataset("fka/awesome-chatgpt-prompts", split='train')
 dataset = dataset.map(format_dataset)
 dataset = dataset.remove_columns(['act', "prompt"])
-print(dataset)
 
 # Split into train and test set
 dataset = dataset.train_test_split(test_size=0.1)
