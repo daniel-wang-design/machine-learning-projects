@@ -17,3 +17,28 @@ cmake -DCOMPUTE_BACKEND=hip -S -DBNB_ROCM_ARCH=gfx1030 .
 make
 pip install .
 ```
+# To turn off SSH PC from VS-Code
+```
+sudo shutdown -h now
+```
+
+# To setup Ubuntu PC to allow SSH
+
+1. install open ssh
+```
+sudo apt install openssh-server
+```
+
+2. Make sure ssh is running
+```
+sudo systemctl status ssh
+```
+TODO: what to do if not active
+3. Allow ssh traffic
+```
+sudo ufw allow ssh
+```
+
+# To reconfigure SSH when using a new network
+
+1. https://www.youtube.com/watch?v=Wlmne44M6fQ TODO
