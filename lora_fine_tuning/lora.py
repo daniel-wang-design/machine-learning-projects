@@ -17,11 +17,12 @@ model = AutoModelForCausalLM.from_pretrained(model_name, token=access_token, qua
 tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token, padding_side="right")
 tokenizer.pad_token = "<|finetune_right_pad_id|>"
 
+LAYERS = ["q_proj", "v_proj"]
 # Apply LoRA
 lora_config = LoraConfig(task_type="CAUSAL_LM", 
                          r=8, lora_alpha=32, 
                          lora_dropout=0.1, 
-                         target_modules=["q_proj", "v_proj"],
+                         target_modules=LAYERS,
                          bias="none")
 model = get_peft_model(model, lora_config)
 
