@@ -42,3 +42,7 @@ sudo ufw allow ssh
 # To reconfigure SSH when using a new network
 
 1. https://www.youtube.com/watch?v=Wlmne44M6fQ TODO
+
+# To connect to PC over any network not just local router
+
+1. tailscale.com TODO
